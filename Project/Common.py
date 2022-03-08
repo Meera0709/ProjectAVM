@@ -1,42 +1,49 @@
 import csv
 import DbOperations
-
-
-
 from turtle import window_height, window_width
+
+#Function to validate DOB year 
 def validateDOByear(date):
     if date.isnumeric():
         if int(date)<=2012 and int(date)>=1920:
             return True
     return False
 
+#Function to check for null on any input 
 def validateNull(input):
     if input:
         return True
     return False
 
+#Function to validate a given mobile number
 def validateMobile(mobile):
     if mobile.isnumeric():
         if len(mobile)==10:
             return True
     return False
 
+#Function to validate days
 def validateDays(days):
     if int(days)<=30:
         return True
     return False
 
+#Function to validate int value
 def validateInt(num):
     if num.isnumeric():
         return True
     return False
-    
+
+#Function to validate check box 
 def validateCb(cbList):
     if any(cbList):
         return True
     return False
-           
+
+#Function to create medicine category and medicine names in csv file
+#populate a global dictionary object
 dict_medcat={}
+# open csv file for write
 f=open("medicine.csv","r")
 reader=csv.reader(f)
 for row in reader:
@@ -47,6 +54,7 @@ for row in reader:
             dict_medcat[row[0]].append(row[1])
 f.close()
 
+#Function to center the window on the desktop
 def centerwindow(root, windowWidth,windowHeight):
     window_sw = root.winfo_screenwidth()
     window_sh = root.winfo_screenheight()
@@ -58,19 +66,21 @@ def centerwindow(root, windowWidth,windowHeight):
     # Positions the window in the center of the page.
     root.geometry('%dx%d+%d+%d' % (windowWidth,windowHeight,x,y))
 
-
+#Function to validate phone during key press event. Limits to enter number and 10 digits
 def validate(P):
     if len(P)==0 or len(P)<=10 and P.isdigit():
         return True
     else:
         return False 
 
+#Function to validate year during key press event. Limits to enter number and 4 digits
 def validate_year(P):
     if len(P)==0 or len(P)<=4 and P.isdigit():
         return True
     else:
         return False 
 
+#Function to check if the given mobile number is present in PatientDetails table
 def refill_validate(mob):
     print("inside refill_val")
     RConn=DbOperations.openDbConnection()
