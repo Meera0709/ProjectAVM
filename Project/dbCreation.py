@@ -1,6 +1,8 @@
 import mysql.connector
 import csv
 
+#This is standalone program to create the database tables for the project
+
 #---Complete list of Medicines---
 
 medlist=[[1,"ENT","Astrepo","Nasal Spray",1000,"Azelastine Hydrochloride Nasal Spray"],
@@ -131,11 +133,12 @@ Timothy and Kentucky Blue Grass Mixed Pollens Allergen Extract"""],
 [120,"Diabetes","Empagliflozin","Tablets",1000,"Jardiance®"]]
 
 try:
+        #Open the database connection to the project DB
         dbConnection=mysql.connector.connect(host="localhost",user="root",password="0410",database="project")
         cursor=dbConnection.cursor()
         print("DB connection success")
 
-        #---Table creation---
+        #---Table creation - Meds_db ---
         query1="""CREATE TABLE IF NOT EXISTS Meds_db
                 (Med_Num int Primary Key, 
                 Category varchar(50), 
@@ -143,12 +146,11 @@ try:
                 Type varchar(50),
                 Quantity int,
                 Information varchar(700))"""
-
-
+        
         cursor.execute(query1)
         print("Table meds_db created successfully")
 
-
+        #---Table creation - PatientDetails ---
         query2="""CREATE TABLE IF NOT EXISTS PatientDetails
                 (MobileNumber bigint Primary Key, 
                 FirstName varchar(50),
@@ -163,6 +165,7 @@ try:
         cursor.execute(query2)
         print("Table PatientDetails created successfully")
 
+        #---Table creation - PatientPresc ---
         query3="""CREATE TABLE IF NOT EXISTS PatientPresc
                 (PrescId int auto_increment primary key,
                 MobileNumber bigint, foreign key(MobileNumber) references PatientDetails(MobileNumber), 
@@ -194,7 +197,7 @@ try:
                         where A.MedicineName = B.MedicineName;"""
         cursor.execute(TriggerQuery)
 
-        #---CSV file creation---
+        #---CSV file creation to hold the medicine name and category for populating drop down box later ---
         csvSelectQuery="SELECT Category, MedicineName from Meds_db"
         cursor.execute(csvSelectQuery)
         listObj=cursor.fetchall()
