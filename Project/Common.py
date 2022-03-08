@@ -40,7 +40,7 @@ def validateCb(cbList):
         return True
     return False
 
-#Function to create medicine category and medicine names in csv file
+#Function to obtain medicine category and medicine names from csv file
 #populate a global dictionary object
 dict_medcat={}
 # open csv file for write
