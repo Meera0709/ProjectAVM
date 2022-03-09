@@ -326,9 +326,14 @@ def click_pdts():
         PdWindow.configure(bg="lightgreen")
         centerwindow(PdWindow,800,600)
         mob_num=mobilenumber1.get()
+        
+        refillFlag = False
         if validateNull(mob_num)==False:
             messagebox.showwarning(message="Please enter Mobile Number")
-        elif refill_validate(mob_num)==True:
+        else:
+            refillFlag = refill_validate(mob_num)
+        
+        if refillFlag==True:
             PdtsConn=DbOperations.openDbConnection()
             PdtsCursor=PdtsConn.cursor()
             PdtsQuery="SELECT concat('Name: ',firstname,' ',lastname, ' Mobile: ', mobilenumber) FROM PatientDetails where MobileNumber ="+mob_num
