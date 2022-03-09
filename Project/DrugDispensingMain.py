@@ -326,9 +326,9 @@ def click_pdts():
         PdWindow.configure(bg="lightgreen")
         centerwindow(PdWindow,800,600)
         mob_num=mobilenumber1.get()
-        
+        MobileNotNull=validateNull(mob_num)
         refillFlag = False
-        if validateNull(mob_num)==False:
+        if MobileNotNull==False:
             messagebox.showwarning(message="Please enter Mobile Number")
         else:
             refillFlag = refill_validate(mob_num)
@@ -365,7 +365,7 @@ def click_pdts():
             DbOperations.closeDbConnection(PdtsConn)
             PdtsWindow.destroy()
             PdWindow.mainloop()
-        else:
+        elif MobileNotNull==True and refillFlag==False:
             messagebox.showwarning(message="Mobile Number not found")
 
     searchButton=Button(PdtsWindow,text="Search",command=PdtsCommand)
