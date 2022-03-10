@@ -9,7 +9,7 @@ import DBOperations
 from Prescription import *
 from PieChart import *
 
-# Drug Dispensing is the main Window  for the application---
+# Drug Dispensing is the main Window  for the application
 drugDispensingWindow=Tk()
 drugDispensingWindow.title("VMS PHARMACEUTICALS")
 drugDispensingWindow.grab_set()
@@ -186,7 +186,7 @@ def click_new():
         allergies=allergies1.get()
         doctor=doctor1.get()
         
-        # Validate user input data---
+        # Validate user input data
         def validation1():
             flag=True
             if refill_validate(mobile)==True:
