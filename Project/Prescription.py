@@ -1,70 +1,67 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-import DbOperations
+import DBOperations
 from Common import *
 import mysql.connector
 
+# function to get distinct rows based on category, medicinename, dosage and unit to be used in
+# prescription refill window to handle duplicate data
 def populate(mobile):
-    RefillConn=DbOperations.openDbConnection()
+    RefillConn=DBOperations.openDbConnection()
     RefCursor=RefillConn.cursor()
     RefQuery="SELECT distinctrow Category, MedicineName,Dosage,Unit from patientPresc where MobileNumber="+mobile
     RefCursor.execute(RefQuery)
     RefList=RefCursor.fetchall()
-    DbOperations.closeDbConnection(RefillConn)
+    DBOperations.closeDbConnection(RefillConn)
     return RefList
 
+# function to open the prescription window in NEW or REFILL mode
+# to avoid redundant painting of the window
 def openPrescription(mode,drugDispensingWindow,mobile):
     if (mode=="NEW"):
         dataList=[]
     else:
+        #refill mode to get data for a given mobile number
         dataList=populate(mobile)
+    # paint the window 
     paintPrescriptionWindow(drugDispensingWindow,mobile,dataList)
 
-
-def getCategoryValues():
-    prescConn=DbOperations.openDbConnection()
-    prescCursor=prescConn.cursor()
-    getCategoriesQuery=("SELECT distinct(Category) FROM Meds_db ORDER BY Category")
-    prescCursor.execute(getCategoriesQuery)
-    list=prescCursor.fetchall()
-    DbOperations.closeDbConnection(prescConn)
-    return list
-
+# function to paint the window in NEW or REFILL mode
 def paintPrescriptionWindow(drugDispensingWindow,mobile,dataList):
-    #---Open new window---
+    # open new window
     Presc=Toplevel(drugDispensingWindow)
     Presc.grab_set()
-    Presc.title("Drug Prescription")
+    Presc.title("MEDICINE PRESCRIPTION")
     Presc.configure(bg="lightgreen")
     centerwindow(Presc,500,300)
     Presc.resizable(0,0)
 
-    #---SNO---
+    # SNO
     SNO=Label(Presc,text="S.NO.",bg="lightgreen")
     SNO.grid(row=1,column=0)
 
-    #---CATEGORY---
+    # CATEGORY
     CAT=Label(Presc,text="CATEGORY",bg="lightgreen")
     CAT.grid(row=1,column=1)
 
-    #---MED NAME---
+    # MED NAME
     DRUG=Label(Presc,text="MEDICINE NAME",bg="lightgreen")
     DRUG.grid(row=1,column=2)
 
-    #---DOSAGE---
+    # DOSAGE
     DOSE=Label(Presc,text="DOSAGE",bg="lightgreen")
     DOSE.grid(row=1,column=3)
 
-    #---UNIT---
+    # UNIT
     UNIT=Label(Presc,text="UNIT",bg="lightgreen")
     UNIT.grid(row=1,column=4)
 
-    #---TIMINGS---
+    # TIMINGS
     M=Label(Presc,text="TIME OF DAY",bg="lightgreen")
     M.grid(row=1,column=5)
 
-    #---NO. OF DAYS---
+    # NO. OF DAYS
     DAYS=Label(Presc,text="DAYS",bg="lightgreen")
     DAYS.grid(row=1,column=6)
 
@@ -74,6 +71,8 @@ def paintPrescriptionWindow(drugDispensingWindow,mobile,dataList):
     
     cat_values=getCategoryValues()
 
+    # Handle keyreleased event to populate medicine combobox based on the category 
+    # combobox value selection 
     def getMedicinename1(event):
         value=event.widget.get()
         MEDICINE1.config(values=dict_medcat.get(value))
@@ -114,7 +113,7 @@ def paintPrescriptionWindow(drugDispensingWindow,mobile,dataList):
         value=event.widget.get()
         MEDICINE10.config(values=dict_medcat.get(value)) 
 
-    #----category and medicine name combobox----
+    # category and medicine name combobox
     CATEGORY1=ttk.Combobox(Presc,values=cat_values,width=10,state="readonly")
     CATEGORY1.grid(row=2,column=1)
     CATEGORY1.bind('<<ComboboxSelected>>', getMedicinename1)
@@ -410,8 +409,10 @@ def paintPrescriptionWindow(drugDispensingWindow,mobile,dataList):
     DAYS10=Entry(Presc,width=5)
     DAYS10.grid(row=11,column=6)
 
-    #---in refill mode---
+    # populate window with data in refill mode
     if len(dataList)>0:
+        # append empty data for the remainder of the rows in the window 
+        # based on the number of records returned
         for i in range (10-len(dataList)):
             dataList.append(['','','','mg',0,0,0,0,''])
 
@@ -459,7 +460,7 @@ def paintPrescriptionWindow(drugDispensingWindow,mobile,dataList):
         UNITv9.set(dataList[8][3])
         UNITv10.set(dataList[9][3])
 
-
+    # function to handle prescription window submit clicked event
     def click_presc_submit():
     
         cat1=CATEGORY1.get()
@@ -568,16 +569,18 @@ def paintPrescriptionWindow(drugDispensingWindow,mobile,dataList):
         [cat8,med8,dose8,unit8,cb81,cb82,cb83,cb84,days8],
         [cat9,med9,dose9,unit9,cb91,cb92,cb93,cb94,days9],
         [cat10,med10,dose10,unit10,cb101,cb102,cb103,cb104,days10]]
-
+        # row level data validation
         def validate2():
             flag=True
             for row in nlist:
                 cbList=[row[4],row[5],row[6],row[7]]
                 if validateNull(row[0]):
                     for cell in range(1,len(row)):
+                        # skip all check boxes
                         if cell in [4,5,6,7]:
                             continue
                         else:
+                            # prompt to fill the remaining data 
                             if validateNull(row[cell])==False:
                                 messagebox.showwarning(message="Fill remaining details of Row Number "+str(nlist.index(row)+1))
                                 flag=False
@@ -600,35 +603,34 @@ def paintPrescriptionWindow(drugDispensingWindow,mobile,dataList):
                         flag=False
                         break
             return flag
-        
+        # insert data into the table in bulk mode
         if validate2()==True:
-            #---saving user input data to PatientDetails table---
+            # saving user input data to PatientDetails table
             try:
-                ppConn=DbOperations.openDbConnection()
+                ppConn=DBOperations.openDbConnection()
                 ppCursor=ppConn.cursor()
                 patientPrescInsertQuery=("""INSERT INTO PatientPresc(MobileNumber,Category,MedicineName,Dosage,Unit,Morning,Afternoon,Evening,Night,NoOfDays,TotalQty,DateOfPurchase) 
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,curdate())""")
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,sysdate())""")
                 ppList=[]
                 for i in range(len(nlist)):
                     if nlist[i][0]!='':
                         qty=(nlist[i][4]+nlist[i][5]+nlist[i][6]+nlist[i][7])*int(nlist[i][8])
                         nlist[i][2]=int(nlist[i][2])
                         nlist[i][-1]=int(nlist[i][-1])
-                        nlist[i].append(qty)
+                        nlist[i].append(qty) 
                         nlist[i].insert(0,int(mobile))
                         ppList.append(nlist[i])
-
+                        # update quantity in meds_db based on the prescription medicine quantity
+                        ppCursor.execute("UPDATE meds_db SET Quantity = Quantity-"+str(qty)+ " WHERE medicinename = '"+nlist[i][2]+"'")
                 ppCursor.executemany(patientPrescInsertQuery,ppList)
                 ppConn.commit()
-                print("prescdata saved successfully")
-                DbOperations.closeDbConnection(ppConn)
+        
+                DBOperations.closeDbConnection(ppConn)
             except mysql.connector.Error as sqlerror:
                 print("DB error {}".format(sqlerror))  
             Presc.destroy()   
             messagebox.showinfo(message="Thank you for placing the order!")
            
-
-    #---submit details to close window---
     prescfrm=Frame(Presc)
     submitBtn1=Button(prescfrm,text="Submit",bg="turquoise",command=click_presc_submit)
     cancelBtn1=Button(prescfrm,text="Cancel",bg="turquoise",command=Presc.destroy)
