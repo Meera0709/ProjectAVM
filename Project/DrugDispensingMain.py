@@ -189,15 +189,17 @@ def click_new():
         # Validate user input data
         def validation1():
             flag=True
-            if refill_validate(mobile)==True:
-                messagebox.showwarning(message="Mobile Number already exists")
-                flag=False
             if validateNull(fname)==False:
                 messagebox.showwarning(message="Please enter the First Name")
                 firstname1.configure(background='yellow')
                 flag=False
             else:
                 firstname1.configure(background='white')
+                if refill_validate(mobile)==True:
+                    messagebox.showwarning(message="Mobile Number already exists")
+                    flag=False
+                else:
+                    flag=True
             if validateNull(lname)==False:
                 messagebox.showwarning(message="Please enter the Last Name")
                 lastname1.configure(background='yellow')
